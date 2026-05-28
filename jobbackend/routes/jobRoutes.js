@@ -7,8 +7,8 @@ const {
   updateJob,
 } = require("../controllers/jobcontroller");
 const { applyForJob } = require("../controllers/applicationController");
-const adminOnly = require("../middleware/adminMiddleware");
-const protect = require("../middleware/authMiddleware");
+const adminOnly = require("../middleware/adminmiddleware");
+const protect = require("../middleware/authmiddleware");
 const upload = require("../middleware/uploadmiddleware");
 
 const router = express.Router();
