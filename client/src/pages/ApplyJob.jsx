@@ -46,7 +46,39 @@ export default function ApplyJob() {
 
   // Handle Resume Upload
   const handleResumeChange = (e) => {
-    setResumeFile(e.target.files[0]);
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      setResumeFile(null);
+      return;
+    }
+
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+    const allowedExtensions = [".pdf", ".doc", ".docx"];
+    const fileExtension = file.name
+      .slice(file.name.lastIndexOf("."))
+      .toLowerCase();
+
+    if (!allowedTypes.includes(file.type) || !allowedExtensions.includes(fileExtension)) {
+      setResumeFile(null);
+      setError("Please upload only PDF, DOC, or DOCX resume files.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setResumeFile(null);
+      setError("Resume must be smaller than 5MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setError("");
+    setResumeFile(file);
   };
 
   const apply = async (e) => {
@@ -73,11 +105,7 @@ export default function ApplyJob() {
         formData.append("resume", resumeFile);
       }
 
-      const res = await API.post(`/jobs/${id}/apply`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const res = await API.post(`/jobs/${id}/apply`, formData);
 
       setMessage(
         res.data.message || "Application submitted successfully."

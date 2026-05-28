@@ -9,6 +9,7 @@ const {
 const { applyForJob } = require("../controllers/applicationController");
 const adminOnly = require("../middleware/adminMiddleware");
 const protect = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadmiddleware");
 
 const router = express.Router();
 
@@ -19,6 +20,6 @@ router.post("/", protect, adminOnly, createJob);
 router.post("/create", protect, adminOnly, createJob);
 router.put("/:id", protect, adminOnly, updateJob);
 router.delete("/:id", protect, adminOnly, deleteJob);
-router.post("/:id/apply", protect, applyForJob);
+router.post("/:id/apply", protect, upload.single("resume"), applyForJob);
 
 module.exports = router;

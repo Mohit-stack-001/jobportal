@@ -11,7 +11,10 @@ const findFallbackJob = (id) => fallbackJobs.find((job) => job._id === id);
 const applyForJob = async (req, res) => {
   try {
     const userId = req.user.id || req.user._id;
-    const { name, email, phone, resume, coverLetter } = req.body;
+    const { name, email, phone, coverLetter } = req.body;
+    const resume = req.file
+      ? `/uploads/resumes/${req.file.filename}`
+      : req.body.resume;
 
     if (!name || !email || !phone || !resume) {
       return res.status(400).json({

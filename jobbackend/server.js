@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const path = require("path");
 const connectDB = require("./config/db");
 
 dotenv.config();
@@ -22,6 +23,8 @@ const applicationRoutes = require("./routes/applicationRoutes");
 app.use(cors());
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 // HOME ROUTE
@@ -42,6 +45,20 @@ app.use("/api/companies", companyRoutes);
 app.use("/api/admin", adminRoutes);
 
 app.use("/api/applications", applicationRoutes);
+
+app.use((error, req, res, next) => {
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message:
+        error.code === "LIMIT_FILE_SIZE"
+          ? "Resume must be smaller than 5MB"
+          : error.message,
+    });
+  }
+
+  next();
+});
 
 
 // PORT

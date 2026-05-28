@@ -26,6 +26,18 @@ const emptyForm = {
   requirements: "",
 };
 
+const getResumeUrl = (resume) => {
+  if (!resume) {
+    return "";
+  }
+
+  if (resume.startsWith("http")) {
+    return resume;
+  }
+
+  return `http://localhost:5000${resume.startsWith("/") ? resume : `/${resume}`}`;
+};
+
 export default function Admin() {
   const navigate = useNavigate();
 
@@ -359,16 +371,28 @@ export default function Admin() {
                         className={`h-fit rounded-full px-3 py-1 text-xs font-black capitalize ${
                           app.status === "accepted"
                             ? "bg-green-500/15 text-green-300"
-                            : "bg-yellow-500/15 text-yellow-200"
+                            : app.status === "rejected"
+                              ? "bg-red-500/15 text-red-300"
+                              : "bg-yellow-500/15 text-yellow-200"
                         }`}
                       >
                         {app.status}
                       </span>
                     </div>
 
-                    <p className="mt-3 text-sm text-slate-300">
-                      Resume: {app.resume}
-                    </p>
+                    {app.resume && (
+                      <p className="mt-3 text-sm text-slate-300">
+                        Resume:{" "}
+                        <a
+                          href={getResumeUrl(app.resume)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-bold text-blue-300 underline-offset-4 hover:underline"
+                        >
+                          View resume
+                        </a>
+                      </p>
+                    )}
 
                     {app.coverLetter && (
                       <p className="mt-2 text-sm leading-6 text-slate-400">
@@ -408,21 +432,18 @@ export default function Admin() {
                         type="button"
                         onClick={async () => {
                           try {
-                            await API.delete(
-                              `/applications/${app._id}`
+                            await API.patch(
+                              `/applications/${app._id}/status`,
+                              {
+                                status:
+                                  "rejected",
+                              }
                             );
 
-                            setApplications(
-                              (prev) =>
-                                prev.filter(
-                                  (item) =>
-                                    item._id !==
-                                    app._id
-                                )
-                            );
+                            loadData();
 
                             setMessage(
-                              "Application deleted."
+                              "Application rejected."
                             );
                           } catch (error) {
                             console.log(error);
@@ -431,7 +452,7 @@ export default function Admin() {
                         className="inline-flex items-center gap-2 rounded-xl bg-red-500/10 px-4 py-2 text-sm font-bold text-red-300 transition hover:bg-red-500 hover:text-white"
                       >
                         <X size={17} />
-                        Reject & Delete
+                        Reject
                       </button>
                     </div>
                   </article>
